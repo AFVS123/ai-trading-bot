@@ -1,0 +1,27 @@
+# Get the price data and make a prediction
+data = get_data()
+next_price = predict_next_price(data)
+
+# Get the current balance and calculate the amount to trade
+balance = exchange.fetch_balance()
+usdt_balance = balance['USDT']['free']
+btc_balance = balance['BTC']['free']
+price = exchange.fetch_ticker(symbol)['last']
+trade_amount = min(usdt_balance, btc_balance * price)
+
+# Make a buy or sell order based on the predicted price
+if next_price > price and usdt_balance > 0:
+    encrypted_api_key = encrypt(api_key.encode('utf-8'))
+    encrypted_secret_key = encrypt(secret_key.encode('utf-8'))
+    exchange.apiKey = encrypted_api_key
+    exchange.secret = encrypted_secret_key
+    execute_order('buy', trade_amount)
+elif next_price < price and btc_balance > 0:
+    encrypted_api_key = encrypt(api_key.encode('utf-8'))
+    encrypted_secret_key = encrypt(secret_key.encode('utf-8'))
+    exchange.apiKey = encrypted_api_key
+    exchange.secret = encrypted_secret_key
+    execute_order('sell', btc_balance)
+
+# Wait for the next time interval to make another prediction
+time.sleep(3600)
